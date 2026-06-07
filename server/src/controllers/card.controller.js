@@ -1,18 +1,17 @@
 import Card from '../models/Card.js';
 import Column from '../models/Column.js';
 import Board from '../models/Board.js';
+import BoardMember from '../models/BoardMember.js';
 
 export const createCard = async (req, res, next) => {
   try {
     const { title, columnId, boardId } = req.body;
 
-    // Verify board exists and belongs to user
-    const board = await Board.findOne({ _id: boardId, owner: req.user.id });
-    if (!board) {
-      return res.status(404).json({ success: false, message: 'Board not found' });
+    const membership = await BoardMember.findOne({ boardId, userId: req.user.id });
+    if (!membership) {
+      return res.status(404).json({ success: false, message: 'Board not found or unauthorized' });
     }
 
-    // Get highest order in this column to append at the bottom
     const lastCard = await Card.findOne({ columnId }).sort('-order');
     const newOrder = lastCard ? lastCard.order + 1 : 0;
 
@@ -33,13 +32,11 @@ export const getCards = async (req, res, next) => {
   try {
     const { boardId } = req.params;
 
-    // Verify board ownership
-    const board = await Board.findOne({ _id: boardId, owner: req.user.id });
-    if (!board) {
-      return res.status(404).json({ success: false, message: 'Board not found' });
+    const membership = await BoardMember.findOne({ boardId, userId: req.user.id });
+    if (!membership) {
+      return res.status(404).json({ success: false, message: 'Board not found or unauthorized' });
     }
 
-    // Fetch all cards for this board, sorted by order
     const cards = await Card.find({ boardId }).sort('order');
 
     res.json({ success: true, cards });
@@ -82,9 +79,8 @@ export const deleteCard = async (req, res, next) => {
 
 export const reorderCards = async (req, res, next) => {
   try {
-    const { items } = req.body; // Array of { _id, order, columnId }
+    const { items } = req.body;
     
-    // Use Promise.all to update all cards concurrently
     await Promise.all(
       items.map(item => 
         Card.findByIdAndUpdate(item._id, { 

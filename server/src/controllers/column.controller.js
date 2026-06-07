@@ -1,17 +1,16 @@
 import Column from '../models/Column.js';
 import Board from '../models/Board.js';
+import BoardMember from '../models/BoardMember.js';
 
 export const createColumn = async (req, res, next) => {
   try {
     const { title, boardId } = req.body;
 
-    // Verify board exists and belongs to user
-    const board = await Board.findOne({ _id: boardId, owner: req.user.id });
-    if (!board) {
-      return res.status(404).json({ success: false, message: 'Board not found' });
+    const membership = await BoardMember.findOne({ boardId, userId: req.user.id });
+    if (!membership) {
+      return res.status(404).json({ success: false, message: 'Board not found or unauthorized' });
     }
 
-    // Get highest order to append at the end
     const lastColumn = await Column.findOne({ boardId }).sort('-order');
     const newOrder = lastColumn ? lastColumn.order + 1 : 0;
 
@@ -31,13 +30,11 @@ export const getColumns = async (req, res, next) => {
   try {
     const { boardId } = req.params;
 
-    // Verify board ownership
-    const board = await Board.findOne({ _id: boardId, owner: req.user.id });
-    if (!board) {
-      return res.status(404).json({ success: false, message: 'Board not found' });
+    const membership = await BoardMember.findOne({ boardId, userId: req.user.id });
+    if (!membership) {
+      return res.status(404).json({ success: false, message: 'Board not found or unauthorized' });
     }
 
-    // Fetch columns sorted by order
     const columns = await Column.find({ boardId }).sort('order');
 
     res.json({ success: true, columns });
@@ -82,9 +79,8 @@ export const deleteColumn = async (req, res, next) => {
 
 export const reorderColumns = async (req, res, next) => {
   try {
-    const { items } = req.body; // Array of { _id, order }
+    const { items } = req.body; 
     
-    // Use Promise.all to update all columns concurrently
     await Promise.all(
       items.map(item => 
         Column.findByIdAndUpdate(item._id, { order: item.order })

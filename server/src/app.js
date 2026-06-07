@@ -16,7 +16,6 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// Setup Socket.io
 const io = new Server(server, {
   cors: {
     origin: process.env.CLIENT_URL,
@@ -25,20 +24,53 @@ const io = new Server(server, {
   },
 });
 
+const boardUsers = {};
+
 io.on('connection', (socket) => {
   console.log('User connected to socket:', socket.id);
 
-  socket.on('join-board', (boardId) => {
+  socket.on('board:join', ({ boardId, user }) => {
     socket.join(boardId);
-    console.log(`User joined board room: ${boardId}`);
+    socket.data.boardId = boardId;
+    socket.data.user = user;
+
+    if (!boardUsers[boardId]) {
+      boardUsers[boardId] = {};
+    }
+    boardUsers[boardId][socket.id] = user;
+
+    socket.emit('users:online', Object.values(boardUsers[boardId]));
+    socket.to(boardId).emit('user:joined', user);
+
+    console.log(`User ${user.name} joined board room: ${boardId}`);
   });
 
   socket.on('board-updated', (boardId) => {
-    // Broadcast to everyone else in the room
     socket.to(boardId).emit('board-updated');
   });
 
+  const handleLeave = () => {
+    const boardId = socket.data.boardId;
+    const user = socket.data.user;
+
+    if (boardId && boardUsers[boardId] && boardUsers[boardId][socket.id]) {
+      delete boardUsers[boardId][socket.id];
+      socket.leave(boardId);
+      
+      socket.to(boardId).emit('user:left', user);
+      
+      if (Object.keys(boardUsers[boardId]).length === 0) {
+        delete boardUsers[boardId];
+      }
+    }
+  };
+
+  socket.on('board:leave', () => {
+    handleLeave();
+  });
+
   socket.on('disconnect', () => {
+    handleLeave();
     console.log('User disconnected:', socket.id);
   });
 });

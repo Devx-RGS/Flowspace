@@ -11,12 +11,12 @@ const boardSchema = new mongoose.Schema(
     description: {
       type: String,
       trim: true,
-      default: '',
+      maxlength: [200, 'Description cannot exceed 200 characters'],
     },
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+    inviteCode: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
   },
   {

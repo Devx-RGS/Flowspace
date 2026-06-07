@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { io } from 'socket.io-client';
+import { Crown } from 'lucide-react';
 import Navbar from '../components/Layout/Navbar';
 import Column from '../components/Board/Column';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import '../components/Board/Board.css';
 
-// Connect directly to the backend server for sockets
 const socket = io('http://localhost:5000', {
   withCredentials: true,
 });
@@ -15,38 +16,66 @@ const socket = io('http://localhost:5000', {
 const BoardPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [board, setBoard] = useState(null);
   const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [presentUsers, setPresentUsers] = useState([]);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
   const [isAddingColumn, setIsAddingColumn] = useState(false);
   const [newColumnTitle, setNewColumnTitle] = useState('');
 
   useEffect(() => {
     fetchBoardData();
-
-    // Socket.io Room Join
-    socket.emit('join-board', id);
-
-    // Listen for updates from other users in the same board
-    socket.on('board-updated', () => {
-      console.log('Received real-time update. Refetching board...');
-      fetchBoardData(false); // fetch silently without loading screen
-    });
-
-    return () => {
-      socket.off('board-updated');
-    };
   }, [id]);
 
-  // showLoading = true by default. Passed false during socket updates to prevent UI flicker
+  useEffect(() => {
+    if (user && userRole) {
+      socket.emit('board:join', {
+        boardId: id,
+        user: { _id: user._id, name: user.name, email: user.email, role: userRole }
+      });
+
+      socket.on('users:online', (users) => {
+        setPresentUsers(users);
+      });
+
+      socket.on('user:joined', (joinedUser) => {
+        setPresentUsers((prev) => {
+          if (prev.find(u => u._id === joinedUser._id)) return prev;
+          return [...prev, joinedUser];
+        });
+      });
+
+      socket.on('user:left', (leftUser) => {
+        setPresentUsers((prev) => prev.filter(u => u._id !== leftUser._id));
+      });
+
+      socket.on('board-updated', () => {
+        fetchBoardData(false); 
+      });
+
+      return () => {
+        socket.emit('board:leave');
+        socket.off('users:online');
+        socket.off('user:joined');
+        socket.off('user:left');
+        socket.off('board-updated');
+      };
+    }
+  }, [id, user, userRole]);
+
   const fetchBoardData = async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
       
       const boardRes = await api.get(`/boards/${id}`);
       setBoard(boardRes.data.board);
+      setUserRole(boardRes.data.role);
 
       const columnsRes = await api.get(`/columns/board/${id}`);
       const cardsRes = await api.get(`/cards/board/${id}`);
@@ -73,6 +102,14 @@ const BoardPage = () => {
 
   const notifyUpdate = () => {
     socket.emit('board-updated', id);
+  };
+
+  const handleShare = () => {
+    if (!board?.inviteCode) return;
+    const joinLink = `${window.location.origin}/join/${board.inviteCode}`;
+    navigator.clipboard.writeText(joinLink);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2000);
   };
 
   const handleCreateColumn = async (e) => {
@@ -135,7 +172,6 @@ const BoardPage = () => {
       source.index === destination.index
     ) return;
 
-    // COLUMNS Reorder
     if (type === 'COLUMN') {
       const newColumns = Array.from(columns);
       const [removed] = newColumns.splice(source.index, 1);
@@ -157,7 +193,6 @@ const BoardPage = () => {
       return;
     }
 
-    // CARDS Reorder
     if (type === 'CARD') {
       const sourceColIndex = columns.findIndex(col => col._id === source.droppableId);
       const destColIndex = columns.findIndex(col => col._id === destination.droppableId);
@@ -216,12 +251,65 @@ const BoardPage = () => {
       
       <div className="board-header">
         <div className="board-info">
-          <h1>{board.title}</h1>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {board.title}
+            {userRole === 'owner' && <Crown size={20} color="var(--accent)" title="You are the Owner" />}
+          </h1>
           {board.description && <p>{board.description}</p>}
         </div>
-        <Link to="/dashboard" className="btn-secondary">
-          &larr; Back to Boards
-        </Link>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {presentUsers.map(u => (
+              <div 
+                key={u._id}
+                title={`${u.name} ${u.role === 'owner' ? '(Owner)' : ''}`}
+                style={{
+                  position: 'relative',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: 'var(--accent)',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  border: '2px solid var(--bg-secondary)'
+                }}
+              >
+                {u.name.charAt(0).toUpperCase()}
+                {u.role === 'owner' && (
+                  <div style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -6,
+                    background: 'var(--bg-primary)',
+                    borderRadius: '50%',
+                    padding: '2px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid var(--border)'
+                  }}>
+                    <Crown size={12} color="var(--accent)" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {userRole === 'owner' && (
+            <button className="btn-primary" onClick={handleShare}>
+              {shareCopied ? 'Copied Link!' : 'Share Board'}
+            </button>
+          )}
+          
+          <Link to="/dashboard" className="btn-secondary">
+            Back
+          </Link>
+        </div>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
