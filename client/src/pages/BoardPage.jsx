@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { io } from 'socket.io-client';
 import Navbar from '../components/Layout/Navbar';
 import Column from '../components/Board/Column';
 import api from '../services/api';
 import '../components/Board/Board.css';
+
+// Connect directly to the backend server for sockets
+const socket = io('http://localhost:5000', {
+  withCredentials: true,
+});
 
 const BoardPage = () => {
   const { id } = useParams();
@@ -19,25 +25,38 @@ const BoardPage = () => {
 
   useEffect(() => {
     fetchBoardData();
+
+    // Socket.io Room Join
+    socket.emit('join-board', id);
+
+    // Listen for updates from other users in the same board
+    socket.on('board-updated', () => {
+      console.log('Received real-time update. Refetching board...');
+      fetchBoardData(false); // fetch silently without loading screen
+    });
+
+    return () => {
+      socket.off('board-updated');
+    };
   }, [id]);
 
-  const fetchBoardData = async () => {
+  // showLoading = true by default. Passed false during socket updates to prevent UI flicker
+  const fetchBoardData = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
+      
       const boardRes = await api.get(`/boards/${id}`);
       setBoard(boardRes.data.board);
 
       const columnsRes = await api.get(`/columns/board/${id}`);
       const cardsRes = await api.get(`/cards/board/${id}`);
 
-      // Group cards by columnId
       const cardsByColumn = cardsRes.data.cards.reduce((acc, card) => {
         if (!acc[card.columnId]) acc[card.columnId] = [];
         acc[card.columnId].push(card);
         return acc;
       }, {});
 
-      // Add cards array to each column object
       const columnsWithCards = columnsRes.data.columns.map(col => ({
         ...col,
         cards: cardsByColumn[col._id] || []
@@ -46,10 +65,14 @@ const BoardPage = () => {
       setColumns(columnsWithCards);
       setError(null);
     } catch (err) {
-      setError('Failed to load board. It may have been deleted or you do not have access.');
+      if (showLoading) setError('Failed to load board. It may have been deleted or you do not have access.');
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
+  };
+
+  const notifyUpdate = () => {
+    socket.emit('board-updated', id);
   };
 
   const handleCreateColumn = async (e) => {
@@ -62,10 +85,10 @@ const BoardPage = () => {
         boardId: id,
       });
 
-      // Add new column with empty cards array
       setColumns([...columns, { ...data.column, cards: [] }]);
       setIsAddingColumn(false);
       setNewColumnTitle('');
+      notifyUpdate();
     } catch (err) {
       alert('Failed to create column');
     }
@@ -77,12 +100,12 @@ const BoardPage = () => {
     try {
       await api.delete(`/columns/${columnId}`);
       setColumns(columns.filter(c => c._id !== columnId));
+      notifyUpdate();
     } catch (err) {
       alert('Failed to delete column');
     }
   };
 
-  // Card Handlers
   const handleAddCard = (columnId, newCard) => {
     setColumns(columns.map(col => {
       if (col._id === columnId) {
@@ -90,6 +113,7 @@ const BoardPage = () => {
       }
       return col;
     }));
+    notifyUpdate();
   };
 
   const handleDeleteCard = (columnId, cardId) => {
@@ -99,45 +123,41 @@ const BoardPage = () => {
       }
       return col;
     }));
+    notifyUpdate();
   };
 
-  // Drag and Drop Logic
   const onDragEnd = async (result) => {
     const { source, destination, type } = result;
 
-    // Dropped outside the list
     if (!destination) return;
-
-    // Dropped in the same position
     if (
       source.droppableId === destination.droppableId &&
       source.index === destination.index
     ) return;
 
-    // Reordering COLUMNS
+    // COLUMNS Reorder
     if (type === 'COLUMN') {
       const newColumns = Array.from(columns);
       const [removed] = newColumns.splice(source.index, 1);
       newColumns.splice(destination.index, 0, removed);
 
-      // Update local state immediately
       setColumns(newColumns);
 
-      // Send to backend
       try {
         const updatedColumns = newColumns.map((col, index) => ({
           _id: col._id,
           order: index
         }));
         await api.put('/columns/reorder', { items: updatedColumns });
+        notifyUpdate();
       } catch (err) {
         alert('Failed to save column order');
-        fetchBoardData(); // revert
+        fetchBoardData(); 
       }
       return;
     }
 
-    // Reordering CARDS
+    // CARDS Reorder
     if (type === 'CARD') {
       const sourceColIndex = columns.findIndex(col => col._id === source.droppableId);
       const destColIndex = columns.findIndex(col => col._id === destination.droppableId);
@@ -151,10 +171,7 @@ const BoardPage = () => {
         : Array.from(destCol.cards);
 
       const [removed] = sourceCards.splice(source.index, 1);
-      
-      // Update columnId of the dragged card if moving across columns
       removed.columnId = destination.droppableId;
-      
       destCards.splice(destination.index, 0, removed);
 
       const newColumns = Array.from(columns);
@@ -165,7 +182,6 @@ const BoardPage = () => {
 
       setColumns(newColumns);
 
-      // Send to backend
       try {
         const updatedCards = destCards.map((card, index) => ({
           _id: card._id,
@@ -173,13 +189,11 @@ const BoardPage = () => {
           columnId: destination.droppableId
         }));
         
-        // If moving across columns, we technically only need to update the dest column's cards
-        // but for safety, we update the source column's cards too if we want perfect ordering.
-        // For now, updating destination column's cards order is sufficient.
         await api.put('/cards/reorder', { items: updatedCards });
+        notifyUpdate();
       } catch (err) {
         alert('Failed to save card order');
-        fetchBoardData(); // revert
+        fetchBoardData(); 
       }
     }
   };
@@ -218,7 +232,6 @@ const BoardPage = () => {
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
-              {/* Render Existing Columns */}
               {columns.map((column, index) => (
                 <Draggable key={column._id} draggableId={column._id} index={index}>
                   {(provided) => (
@@ -243,7 +256,6 @@ const BoardPage = () => {
               
               {provided.placeholder}
 
-              {/* Add New Column Section */}
               <div style={{ minWidth: '300px', maxWidth: '300px' }}>
                 {isAddingColumn ? (
                   <form className="add-column-form" onSubmit={handleCreateColumn}>
