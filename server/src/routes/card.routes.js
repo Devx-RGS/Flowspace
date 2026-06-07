@@ -4,6 +4,7 @@ import {
   getCards,
   updateCard,
   deleteCard,
+  reorderCards,
 } from '../controllers/card.controller.js';
 import auth from '../middleware/auth.js';
 
@@ -16,6 +17,9 @@ router.get('/board/:boardId', getCards);
 
 // Create a new card
 router.post('/', createCard);
+
+// Reorder cards
+router.put('/reorder', reorderCards);
 
 // Update or delete a card
 router.route('/:id')

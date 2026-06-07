@@ -1,10 +1,10 @@
 import { useState } from 'react';
+import { Droppable } from '@hello-pangea/dnd';
 import Card from './Card';
 import api from '../../services/api';
 import './Board.css';
 
-const Column = ({ column, boardId, initialCards, onDeleteColumn }) => {
-  const [cards, setCards] = useState(initialCards || []);
+const Column = ({ column, cards, boardId, onDeleteColumn, onAddCard, onDeleteCard, dragHandleProps }) => {
   const [isAddingCard, setIsAddingCard] = useState(false);
   const [newCardTitle, setNewCardTitle] = useState('');
 
@@ -19,7 +19,7 @@ const Column = ({ column, boardId, initialCards, onDeleteColumn }) => {
         boardId: boardId,
       });
 
-      setCards([...cards, data.card]);
+      onAddCard(column._id, data.card);
       setIsAddingCard(false);
       setNewCardTitle('');
     } catch (err) {
@@ -30,7 +30,7 @@ const Column = ({ column, boardId, initialCards, onDeleteColumn }) => {
   const handleDeleteCard = async (cardId) => {
     try {
       await api.delete(`/cards/${cardId}`);
-      setCards(cards.filter(c => c._id !== cardId));
+      onDeleteCard(column._id, cardId);
     } catch (err) {
       alert('Failed to delete card');
     }
@@ -38,7 +38,7 @@ const Column = ({ column, boardId, initialCards, onDeleteColumn }) => {
 
   return (
     <div className="column-container">
-      <div className="column-header">
+      <div className="column-header" {...dragHandleProps}>
         {column.title}
         <button 
           className="btn-delete-icon" 
@@ -49,48 +49,62 @@ const Column = ({ column, boardId, initialCards, onDeleteColumn }) => {
         </button>
       </div>
       
-      <div className="column-body">
-        {cards.map(card => (
-          <Card 
-            key={card._id} 
-            card={card} 
-            onDelete={handleDeleteCard} 
-          />
-        ))}
-
-        {isAddingCard ? (
-          <form className="add-card-form" onSubmit={handleAddCard}>
-            <textarea
-              placeholder="Enter a title for this card..."
-              value={newCardTitle}
-              onChange={(e) => setNewCardTitle(e.target.value)}
-              autoFocus
-              required
-              rows={2}
-            />
-            <div className="add-card-actions">
-              <button type="submit" className="btn-primary btn-sm">Add Card</button>
-              <button 
-                type="button" 
-                className="btn-secondary btn-sm"
-                onClick={() => {
-                  setIsAddingCard(false);
-                  setNewCardTitle('');
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : (
-          <button 
-            className="add-card-btn" 
-            onClick={() => setIsAddingCard(true)}
+      <Droppable droppableId={column._id} type="CARD">
+        {(provided, snapshot) => (
+          <div 
+            className="column-body"
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            style={{ 
+              background: snapshot.isDraggingOver ? 'rgba(255,255,255,0.02)' : 'transparent',
+              transition: 'background 0.2s ease'
+            }}
           >
-            + Add a card
-          </button>
+            {cards.map((card, index) => (
+              <Card 
+                key={card._id} 
+                card={card}
+                index={index}
+                onDelete={handleDeleteCard} 
+              />
+            ))}
+            {provided.placeholder}
+
+            {isAddingCard ? (
+              <form className="add-card-form" onSubmit={handleAddCard}>
+                <textarea
+                  placeholder="Enter a title for this card..."
+                  value={newCardTitle}
+                  onChange={(e) => setNewCardTitle(e.target.value)}
+                  autoFocus
+                  required
+                  rows={2}
+                />
+                <div className="add-card-actions">
+                  <button type="submit" className="btn-primary btn-sm">Add Card</button>
+                  <button 
+                    type="button" 
+                    className="btn-secondary btn-sm"
+                    onClick={() => {
+                      setIsAddingCard(false);
+                      setNewCardTitle('');
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button 
+                className="add-card-btn" 
+                onClick={() => setIsAddingCard(true)}
+              >
+                + Add a card
+              </button>
+            )}
+          </div>
         )}
-      </div>
+      </Droppable>
     </div>
   );
 };

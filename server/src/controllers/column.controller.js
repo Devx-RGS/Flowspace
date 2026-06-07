@@ -79,3 +79,20 @@ export const deleteColumn = async (req, res, next) => {
     next(error);
   }
 };
+
+export const reorderColumns = async (req, res, next) => {
+  try {
+    const { items } = req.body; // Array of { _id, order }
+    
+    // Use Promise.all to update all columns concurrently
+    await Promise.all(
+      items.map(item => 
+        Column.findByIdAndUpdate(item._id, { order: item.order })
+      )
+    );
+
+    res.json({ success: true, message: 'Columns reordered' });
+  } catch (error) {
+    next(error);
+  }
+};

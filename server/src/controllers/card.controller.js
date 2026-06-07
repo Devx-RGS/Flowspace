@@ -79,3 +79,23 @@ export const deleteCard = async (req, res, next) => {
     next(error);
   }
 };
+
+export const reorderCards = async (req, res, next) => {
+  try {
+    const { items } = req.body; // Array of { _id, order, columnId }
+    
+    // Use Promise.all to update all cards concurrently
+    await Promise.all(
+      items.map(item => 
+        Card.findByIdAndUpdate(item._id, { 
+          order: item.order,
+          columnId: item.columnId
+        })
+      )
+    );
+
+    res.json({ success: true, message: 'Cards reordered' });
+  } catch (error) {
+    next(error);
+  }
+};

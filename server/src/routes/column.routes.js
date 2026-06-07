@@ -4,6 +4,7 @@ import {
   getColumns,
   updateColumn,
   deleteColumn,
+  reorderColumns,
 } from '../controllers/column.controller.js';
 import auth from '../middleware/auth.js';
 
@@ -16,6 +17,9 @@ router.get('/board/:boardId', getColumns);
 
 // Create a new column
 router.post('/', createColumn);
+
+// Reorder columns
+router.put('/reorder', reorderColumns);
 
 // Update (rename/reorder) or delete a column
 router.route('/:id')
