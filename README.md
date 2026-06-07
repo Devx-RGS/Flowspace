@@ -129,3 +129,8 @@ Each user's avatar (with name initial) is rendered in the board header. The owne
 - **Task Details:** Add checkboxes inside cards, show who created the card, and add timestamps for when a task was finished.
 - **Mobile Support & UI:** Make the board look better and work smoothly on small mobile screens.
 - **Testing:** Write some basic API tests using Jest to make sure the core features don't break when making changes.
+
+<img width="1919" height="977" alt="Screenshot 2026-06-07 233807" src="https://github.com/user-attachments/assets/c2207e02-c532-49a1-91b2-ffcee065e06f" />
+<img width="1919" height="978" alt="Screenshot 2026-06-07 233702" src="https://github.com/user-attachments/assets/f699b35f-a001-48fe-ac2e-2e56396430d1" />
+<img width="1919" height="970" alt="Screenshot 2026-06-07 233338" src="https://github.com/user-attachments/assets/781fdb3f-fc54-48ea-b75c-e3a7023fef42" />
+<img width="1919" height="963" alt="Screenshot 2026-06-07 233055" src="https://github.com/user-attachments/assets/637b1173-c1fd-4fc3-ae4c-746effdaa7e6" />
