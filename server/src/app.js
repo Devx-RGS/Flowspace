@@ -7,6 +7,7 @@ import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.routes.js';
 import boardRoutes from './routes/board.routes.js';
+import columnRoutes from './routes/column.routes.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/boards', boardRoutes);
+app.use('/api/columns', columnRoutes);
 
 app.use(errorHandler);
 

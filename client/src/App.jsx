@@ -3,6 +3,7 @@ import { useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import Dashboard from './pages/Dashboard';
+import BoardPage from './pages/BoardPage';
 import ProtectedRoute from './components/Layout/ProtectedRoute';
 
 function App() {
@@ -23,7 +24,7 @@ function App() {
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/board/:id" element={<h1>Board Page (Coming Soon)</h1>} />
+          <Route path="/board/:id" element={<BoardPage />} />
         </Route>
 
         <Route 

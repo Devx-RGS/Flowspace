@@ -1,0 +1,110 @@
+.board-page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg-primary);
+}
+
+.board-header {
+  padding: 20px 32px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.board-info h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.board-info p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Horizontal Scrolling Area for Columns */
+.board-canvas {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 24px 32px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+/* Individual Column */
+.column-container {
+  min-width: 300px;
+  max-width: 300px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+
+.column-header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.column-body {
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Add Column Button */
+.add-column-btn {
+  min-width: 300px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.add-column-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.add-column-form {
+  min-width: 300px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  border: 1px solid var(--accent);
+}
+
+.add-column-form input {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.add-column-actions {
+  display: flex;
+  gap: 8px;
+}
