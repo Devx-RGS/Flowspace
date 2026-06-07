@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
+import authRoutes from './routes/auth.routes.js';
+import boardRoutes from './routes/board.routes.js';
 
 dotenv.config();
 
@@ -19,8 +21,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'Flowspace API is running' });
+  res.json({ success: true, message: 'Flowspace API is running 🚀' });
 });
+
+app.use('/api/auth', authRoutes);
+app.use('/api/boards', boardRoutes);
 
 app.use(errorHandler);
 
