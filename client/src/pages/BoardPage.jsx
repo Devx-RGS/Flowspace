@@ -1,34 +1,40 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Layout/Navbar';
+import Column from '../components/Board/Column';
 import api from '../services/api';
 import '../components/Board/Board.css';
 
 const BoardPage = () => {
-  const { id } = useParams(); // Gets the board ID from the URL (/board/:id)
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [board, setBoard] = useState(null);
   const [columns, setColumns] = useState([]);
+  const [allCards, setAllCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // New Column State
   const [isAddingColumn, setIsAddingColumn] = useState(false);
   const [newColumnTitle, setNewColumnTitle] = useState('');
 
   useEffect(() => {
-    fetchBoardAndColumns();
+    fetchBoardData();
   }, [id]);
 
-  const fetchBoardAndColumns = async () => {
+  const fetchBoardData = async () => {
     try {
       setLoading(true);
       // Fetch board details
       const boardRes = await api.get(`/boards/${id}`);
       setBoard(boardRes.data.board);
 
-      // Fetch columns for this board
+      // Fetch columns
       const columnsRes = await api.get(`/columns/board/${id}`);
       setColumns(columnsRes.data.columns);
+      
+      // Fetch all cards for this board
+      const cardsRes = await api.get(`/cards/board/${id}`);
+      setAllCards(cardsRes.data.cards);
       
       setError(null);
     } catch (err) {
@@ -53,6 +59,17 @@ const BoardPage = () => {
       setNewColumnTitle('');
     } catch (err) {
       alert('Failed to create column');
+    }
+  };
+
+  const handleDeleteColumn = async (columnId) => {
+    if (!window.confirm('Are you sure you want to delete this list and all its cards?')) return;
+    
+    try {
+      await api.delete(`/columns/${columnId}`);
+      setColumns(columns.filter(c => c._id !== columnId));
+    } catch (err) {
+      alert('Failed to delete column');
     }
   };
 
@@ -85,17 +102,13 @@ const BoardPage = () => {
       <div className="board-canvas">
         {/* Render Existing Columns */}
         {columns.map((column) => (
-          <div key={column._id} className="column-container">
-            <div className="column-header">
-              {column.title}
-            </div>
-            <div className="column-body">
-              {/* Cards will go here in Phase 5 */}
-              <div style={{ color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', marginTop: '20px' }}>
-                No cards yet
-              </div>
-            </div>
-          </div>
+          <Column 
+            key={column._id}
+            column={column}
+            boardId={board._id}
+            initialCards={allCards.filter(card => card.columnId === column._id)}
+            onDeleteColumn={handleDeleteColumn}
+          />
         ))}
 
         {/* Add New Column Section */}
@@ -103,7 +116,7 @@ const BoardPage = () => {
           <form className="add-column-form" onSubmit={handleCreateColumn}>
             <input
               type="text"
-              placeholder="Enter column title..."
+              placeholder="Enter list title..."
               value={newColumnTitle}
               onChange={(e) => setNewColumnTitle(e.target.value)}
               autoFocus
@@ -111,7 +124,7 @@ const BoardPage = () => {
             />
             <div className="add-column-actions">
               <button type="submit" className="btn-primary" style={{ flex: 1, padding: '8px' }}>
-                Add
+                Add List
               </button>
               <button 
                 type="button" 
