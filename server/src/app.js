@@ -95,11 +95,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  await connectDB();
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Flowspace server running on port ${PORT}`);
-  });
-};
-
-startServer();
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Flowspace server running on port ${PORT}`);
+  connectDB();
+});
