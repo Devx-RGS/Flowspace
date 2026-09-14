@@ -6,24 +6,27 @@
 }
 
 .board-header {
-  padding: 20px 32px;
-  background: var(--bg-secondary);
+  padding: 24px 40px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4px 20px rgba(74, 78, 105, 0.03);
 }
 
 .board-info h1 {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .board-info p {
-  font-size: 14px;
-  color: var(--text-muted);
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-family: 'Nunito', sans-serif;
 }
 
 /* Horizontal Scrolling Area for Columns */
@@ -31,7 +34,7 @@
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 24px 32px;
+  padding: 32px 40px;
   display: flex;
   align-items: flex-start;
   gap: 24px;
@@ -39,46 +42,48 @@
 
 /* Individual Column */
 .column-container {
-  min-width: 300px;
-  max-width: 300px;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
+  min-width: 320px;
+  max-width: 320px;
+  background: rgba(143, 201, 176, 0.08); /* Faint mint */
+  border-radius: 20px;
+  border: 1px solid rgba(143, 201, 176, 0.2);
   display: flex;
   flex-direction: column;
   max-height: 100%;
+  transition: all var(--transition);
 }
 
 .column-header {
-  padding: 16px;
+  padding: 20px 20px 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-light);
-  font-weight: 600;
+  font-weight: 800;
   color: var(--text-primary);
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
 }
 
 .column-body {
-  padding: 16px;
+  padding: 12px 20px 20px 20px;
   flex: 1;
   overflow-y: auto;
   min-height: 50px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 /* Add Column Button */
 .add-column-btn {
-  min-width: 300px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
+  min-width: 320px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px dashed rgba(143, 201, 176, 0.4);
+  border-radius: 20px;
+  color: var(--accent);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,22 +91,25 @@
 }
 
 .add-column-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-  border-color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(143, 201, 176, 0.1);
+  transform: translateY(-2px);
 }
 
 .add-column-form {
-  min-width: 300px;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  padding: 12px;
+  min-width: 320px;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
   border: 1px solid var(--accent);
+  box-shadow: 0 8px 24px rgba(143, 201, 176, 0.15);
 }
 
 .add-column-form input {
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  background: var(--bg-primary);
 }
 
 .add-column-actions {
@@ -111,18 +119,25 @@
 
 /* Cards */
 .card-container {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  cursor: pointer;
-  transition: all var(--transition);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: grab;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 2px 8px rgba(74, 78, 105, 0.04);
 }
 
 .card-container:hover {
-  border-color: var(--text-muted);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(143, 201, 176, 0.15);
+  border-color: var(--accent-light);
+  z-index: 10;
+}
+
+.card-container:active {
+  cursor: grabbing;
 }
 
 .card-header {
@@ -133,22 +148,24 @@
 }
 
 .card-title {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text-primary);
   word-break: break-word;
   margin: 0;
+  font-family: 'Nunito', sans-serif;
 }
 
 .card-description {
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 13px;
+  color: var(--text-secondary);
   margin-top: 8px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-height: 1.5;
 }
 
 /* Add Card inside Column */
@@ -157,37 +174,43 @@
   color: var(--text-muted);
   border: none;
   text-align: left;
-  padding: 8px;
+  padding: 12px;
   font-size: 14px;
-  font-weight: 500;
-  border-radius: var(--radius-sm);
-  margin-top: 8px;
+  font-weight: 700;
+  border-radius: 12px;
+  margin-top: 4px;
   cursor: pointer;
   transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .add-card-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
+  background: rgba(143, 201, 176, 0.1);
+  color: var(--accent);
 }
 
 .add-card-form {
-  background: var(--bg-primary);
-  border-radius: var(--radius-sm);
-  padding: 8px;
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
   margin-top: 8px;
   border: 1px solid var(--accent);
+  box-shadow: 0 8px 24px rgba(143, 201, 176, 0.15);
 }
 
 .add-card-form textarea {
   width: 100%;
-  background: transparent;
-  border: none;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 12px;
   color: var(--text-primary);
   font-size: 14px;
   resize: none;
   outline: none;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .add-card-actions {
@@ -196,7 +219,7 @@
 }
 
 .btn-sm {
-  padding: 6px 12px;
+  padding: 10px 16px;
   font-size: 13px;
 }
 
@@ -207,15 +230,20 @@
   color: var(--text-muted);
   font-size: 18px;
   line-height: 1;
-  padding: 0 4px;
+  padding: 4px;
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  opacity: 0.5;
+  border-radius: 8px;
+  opacity: 0;
   transition: all 0.2s;
 }
 
+.card-container:hover .btn-delete-icon,
+.column-container:hover .btn-delete-icon {
+  opacity: 0.6;
+}
+
 .btn-delete-icon:hover {
-  opacity: 1;
-  color: var(--danger);
-  background: rgba(231, 76, 60, 0.1);
+  opacity: 1 !important;
+  color: var(--danger-text);
+  background: var(--danger);
 }

@@ -47,11 +47,11 @@ export const getCards = async (req, res, next) => {
 
 export const updateCard = async (req, res, next) => {
   try {
-    const { title, description, columnId, order } = req.body;
+    const { title, columnId, order } = req.body;
     
     const card = await Card.findByIdAndUpdate(
       req.params.id,
-      { $set: { title, description, columnId, order } },
+      { $set: { title, columnId, order } },
       { new: true, runValidators: true }
     );
 

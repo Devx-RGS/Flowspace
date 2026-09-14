@@ -33,7 +33,7 @@ export const signup = async (req, res, next) => {
       email,
       password,
       avatar: name.charAt(0).toUpperCase(),
-    });
+    }); 
 
     const token = generateToken(user._id);
     setTokenCookie(res, token);

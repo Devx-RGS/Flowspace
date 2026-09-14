@@ -6,10 +6,10 @@ const Navbar = () => {
   const { user, logout } = useAuth();
 
   return (
-    <nav className="navbar">
+    <nav className="navbar glass-nav">
       <Link to="/dashboard" className="nav-brand">
         <div className="brand-icon">F</div>
-        Flowspace
+        <span className="cyber-text">Flowspace</span>
       </Link>
 
       {user && (

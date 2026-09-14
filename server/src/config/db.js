@@ -1,4 +1,8 @@
 import mongoose from 'mongoose';
+import dns from 'node:dns';
+
+// Force Node.js to use Google DNS for SRV records resolution
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const connectDB = async () => {
   try {
@@ -12,3 +16,4 @@ const connectDB = async () => {
 };
 
 export default connectDB;
+

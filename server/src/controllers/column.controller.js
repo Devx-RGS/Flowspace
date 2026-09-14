@@ -47,8 +47,6 @@ export const updateColumn = async (req, res, next) => {
   try {
     const { title, order } = req.body;
     
-    // Note: To be fully secure, we should verify board ownership here too, 
-    // but for simplicity we'll just update by ID.
     const column = await Column.findByIdAndUpdate(
       req.params.id,
       { $set: { title, order } },

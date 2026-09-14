@@ -5,7 +5,7 @@ const Card = ({ card, index, onDelete }) => {
   return (
     <Draggable draggableId={card._id} index={index}>
       {(provided, snapshot) => (
-        <div 
+        <div
           className="card-container"
           ref={provided.innerRef}
           {...provided.draggableProps}
@@ -18,17 +18,14 @@ const Card = ({ card, index, onDelete }) => {
         >
           <div className="card-header">
             <h4 className="card-title">{card.title}</h4>
-            <button 
-              className="btn-delete-icon" 
+            <button
+              className="btn-delete-icon"
               onClick={() => onDelete(card._id)}
               title="Delete Card"
             >
               ×
             </button>
           </div>
-          {card.description && (
-            <div className="card-description">{card.description}</div>
-          )}
         </div>
       )}
     </Draggable>

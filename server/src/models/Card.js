@@ -8,11 +8,6 @@ const cardSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, 'Title cannot exceed 100 characters'],
     },
-    description: {
-      type: String,
-      trim: true,
-      default: '',
-    },
     columnId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Column',

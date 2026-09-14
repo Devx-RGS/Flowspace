@@ -2,79 +2,91 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 32px;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
+  padding: 16px 40px;
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--glass-border);
   position: sticky;
   top: 0;
   z-index: 50;
+  box-shadow: var(--shadow-sm);
 }
 
 .nav-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 800;
   text-decoration: none;
+  font-family: 'Nunito', sans-serif;
 }
 
 .brand-icon {
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
   color: white;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm);
-  font-size: 16px;
+  border-radius: 12px;
+  font-size: 20px;
   font-weight: 800;
+  box-shadow: 0 4px 10px rgba(143, 201, 176, 0.4);
 }
 
 .nav-user {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   border-radius: var(--radius-full);
-  background: var(--bg-input);
+  background: var(--accent-light);
   color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-  border: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 16px;
+  border: 2px solid white;
+  box-shadow: var(--shadow-sm);
 }
 
 .user-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text-primary);
+  font-family: 'Nunito', sans-serif;
 }
 
 .btn-logout {
-  background: transparent;
-  color: var(--text-muted);
+  background: var(--bg-card);
+  color: var(--text-secondary);
   font-size: 14px;
-  font-weight: 500;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-logout:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
+  background: var(--danger);
+  color: var(--danger-text);
+  border-color: var(--danger);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
 }
