@@ -2,6 +2,9 @@
 
 A full-stack Kanban board application where authenticated users can create boards, organize tasks into columns, and collaborate in real time with other users.
 
+<img width="1919" height="939" alt="ss1" src="https://github.com/user-attachments/assets/34950e52-c570-485a-b60c-2570aea7ee04" />
+<img width="1919" height="938" alt="ss2" src="https://github.com/user-attachments/assets/b93cad75-fd92-4788-8a60-28056ec4d02b" />
+
 ## Tech Stack
 
 | Layer | Technology | Why |
@@ -129,6 +132,3 @@ Each user's avatar (with name initial) is rendered in the board header. The owne
 - **Task Details:** Add checkboxes inside cards, show who created the card, and add timestamps for when a task was finished.
 - **Mobile Support & UI:** Make the board look better and work smoothly on small mobile screens.
 - **Testing:** Write some basic API tests using Jest to make sure the core features don't break when making changes.
-
-<img width="1919" height="939" alt="ss1" src="https://github.com/user-attachments/assets/34950e52-c570-485a-b60c-2570aea7ee04" />
-<img width="1919" height="938" alt="ss2" src="https://github.com/user-attachments/assets/b93cad75-fd92-4788-8a60-28056ec4d02b" />
