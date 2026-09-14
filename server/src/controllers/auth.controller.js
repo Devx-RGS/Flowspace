@@ -10,8 +10,8 @@ const generateToken = (id) => {
 const setTokenCookie = (res, token) => {
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: true, /* Required for cross-origin cookies */
+    sameSite: 'none', /* Required because frontend and backend are on different domains */
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 };
@@ -82,6 +82,8 @@ export const login = async (req, res, next) => {
 export const logout = (req, res) => {
   res.cookie('token', '', {
     httpOnly: true,
+    secure: true,
+    sameSite: 'none',
     expires: new Date(0),
   });
   res.json({ success: true, message: 'Logged out successfully' });
